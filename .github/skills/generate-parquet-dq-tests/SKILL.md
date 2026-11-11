@@ -1,64 +1,182 @@
----
-name: generate-parquet-dq-tests
-description: >-
-  TODO: One or two sentences — what the skill generates, when to invoke it,
-  and what it must refuse (framework/Jenkins/conftest). Example pattern:
-  "Creates parquet_files test modules from docs/parquet-aggregated-data-mapping.md …"
-disable-model-invocation: true
----
+name: generate-parquet-dq-tests description: >- Creates parquet dataset data quality test modules from docs/parquet-aggregated-data-mapping.md. Use this skill only after the PyTest DQ Framework has been implemented. Generates dataset-specific parquet validation tests and refuses framework, Jenkinsfile, connector, fixture, or conftest generation. disable-model-invocation: true
+Generate Parquet DQ Tests
+This skill is used during the PyTest DQ Framework assignment to generate parquet dataset validation tests from the mapping document.
 
-# Generate Parquet DQ tests
+Read first:
 
-Complete this skill as **Step 2** of the PyTest DQ assignment. Read first:
+PyTest DQ Framework/docs/test-automation-strategy.md
+docs/parquet-aggregated-data-mapping.md
+Expected SQL must always be derived from the mapping document.
 
-- `PyTest DQ Framework/docs/test-automation-strategy.md` — **§5 Skill contract**, **§6 Test design standard**
-- `docs/parquet-aggregated-data-mapping.md` — dataset definitions (expected SQL comes from here)
+Do not copy SQL from data_dev/.
 
-**Do not** paste expected SQL for the three named datasets into this skill.  
-**Do not** instruct the agent to copy SQL from `data_dev/`.
+Do not embed framework code, Jenkins configuration, or connector code.
 
-When finished, every `TODO` below must be replaced. Run the **Skill review** checklist before using the skill to generate tests.
+When this skill applies
+Use this skill only when:
 
-## When this skill applies
+The PyTest DQ Framework has already been implemented.
+Connectors, fixtures, conftest.py, pytest.ini, Jenkinsfile, and DataQualityLibrary already exist.
+The target output location is:
+tests/dq_checks/parquet_files/
+A dataset exists in:
+docs/parquet-aggregated-data-mapping.md
+Refuse if:
 
-TODO: When the agent should use this skill; what must already exist (framework); allowed paths; when to refuse.
+The mapping document is unavailable.
+The request is to generate framework components.
+The request is to modify Jenkinsfile or conftest.py.
+The request is to generate SQL from data_dev sources.
+Inputs You Must Have
+Required inputs:
 
-## Inputs you must have
+Dataset definition from:
+docs/parquet-aggregated-data-mapping.md
+Existing DataQualityLibrary methods.
+Existing parquet_reader fixture.
+Existing db_connection fixture.
+If mapping information is missing:
 
-TODO: Required inputs and where mapping lives (`docs/parquet-aggregated-data-mapping.md`). What to do if mapping is missing. Forbidden sources.
+Stop test generation.
+Report the missing mapping details.
+Forbidden sources:
 
-## Hard rules
+data_dev SQL
+hardcoded expected results
+parquet pipeline implementation code
+Hard Rules
+Generate test files only under:
+tests/dq_checks/parquet_files/
+Source data must come from PostgreSQL.
 
-TODO: Numbered rules — at minimum cover file path, source vs target, mapping-only SQL, no dataset SQL in SKILL.md, library methods only, markers, not-null columns. Use TAS §5.4 as your checklist.
+Target data must come from parquet files.
 
-## Workflow
+Expected SQL must be derived only from docs/parquet-aggregated-data-mapping.md.
 
-TODO: Steps from mapping → SQL → module → markers. Keep it operational, not a copy of TAS prose.
+Never embed dataset-specific SQL inside this skill document.
 
-## Template
+Never use SQL from data_dev.
 
-Paste the **full** module skeleton from TAS §6.2 (placeholders only). Align source/target with TAS, not swapped names in `test_examples.py`.
+Use DataQualityLibrary validation methods whenever available.
 
-```python
-# TODO: replace with full template from TAS §6.2
-```
+Every generated module must include:
 
-## SQL derivation (generic)
+Smoke validation
+Count validation
+Completeness validation
+Uniqueness validation
+Not-null validation
+Use:
 
-TODO: Generic rules only (joins, dates, names, aggregates, GROUP BY). No SQL for a specific dataset.
+@pytest.mark.parquet_data
+on every generated test.
 
-## After generation
+Not-null checks must include all columns marked not-null in the mapping.
 
-TODO: Running pytest only if asked; do not rewrite expected SQL to force green runs.
+Uniqueness checks must use grouping columns defined by the mapping.
 
----
+Do not create always-pass assertions.
 
-## Skill review (self-check before Step 3)
+Workflow
+Read the dataset definition from the mapping document.
+Determine source and target structures.
+Derive expected SQL from transformation rules.
+Identify not-null columns.
+Identify grouping columns.
+Build the parquet test module.
+Add pytest markers.
+Create smoke, count, completeness, uniqueness, and not-null tests.
+Save the generated module under:
+tests/dq_checks/parquet_files/
+Validate naming and markers before completion.
+Template
+import pytest
 
-Reject your own skill if any of these are true:
 
-- [ ] Contains concrete expected SQL for `facility_name_min_time_spent_per_visit_date`, `facility_type_avg_time_spent_per_visit_date`, or `patient_sum_treatment_cost_per_facility_type`
-- [ ] Tells the agent to use `data_dev/` or parquet loader SQL
-- [ ] Omits completeness, count, uniqueness, or not-null
-- [ ] Swaps Postgres vs Parquet fixtures or generates trivial always-pass checks
-- [ ] Any section still says `TODO`
+@pytest.mark.parquet_data
+@pytest.mark.smoke
+def test_dataset_not_empty(
+        target_data,
+        data_quality_library):
+
+    data_quality_library.check_dataset_is_not_empty(
+        target_data
+    )
+
+
+@pytest.mark.parquet_data
+@pytest.mark.not_null
+def test_not_null_columns(
+        target_data,
+        data_quality_library):
+
+    data_quality_library.check_not_null_values(
+        target_data,
+        COLUMN_LIST
+    )
+
+
+@pytest.mark.parquet_data
+@pytest.mark.uniqueness
+def test_uniqueness(
+        target_data):
+
+    duplicates = target_data.duplicated(
+        subset=UNIQUE_COLUMNS
+    ).sum()
+
+    assert duplicates == 0
+
+
+@pytest.mark.parquet_data
+@pytest.mark.count
+def test_row_count(
+        source_data,
+        target_data,
+        data_quality_library):
+
+    data_quality_library.check_count(
+        source_data,
+        target_data
+    )
+
+
+@pytest.mark.parquet_data
+@pytest.mark.completeness
+def test_data_completeness(
+        source_data,
+        target_data,
+        data_quality_library):
+
+    data_quality_library.check_data_full_data_set(
+        source_data,
+        target_data
+    )
+SQL Derivation (Generic)
+Apply these generic rules:
+
+Use joins defined by source relationships.
+Convert timestamp columns to dates when required by the mapping.
+Apply aggregation rules exactly as specified.
+Apply GROUP BY to all grouping fields.
+Construct derived fields exactly as described in the mapping.
+Preserve aggregation logic from the mapping document.
+Do not simplify SQL to force successful execution.
+After Generation
+Save the generated test file.
+Ensure markers are correct.
+Do not modify expected SQL to force passing results.
+Run pytest only when explicitly requested.
+Report failures as mapping, transformation, or parquet-data issues.
+Skill Review (Self-Check Before Step 3)
+Reject the skill if:
+
+It contains expected SQL for specific datasets.
+It instructs the use of data_dev SQL.
+It omits completeness checks.
+It omits count checks.
+It omits uniqueness checks.
+It omits not-null checks.
+It swaps PostgreSQL and parquet sources.
+It generates trivial assertions.
+Any TODO remains.
