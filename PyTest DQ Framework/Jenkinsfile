@@ -5,20 +5,24 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                sh '''
-                python3 -m venv venv
-                . venv/bin/activate
-                pip install -r requirements.txt
-                '''
+                dir('PyTest DQ Framework') {
+                    sh '''
+                    python3 -m venv venv
+                    . venv/bin/activate
+                    pip install -r requirements.txt
+                    '''
+                }
             }
         }
 
         stage('Run Data Quality Tests') {
             steps {
-                sh '''
-                . venv/bin/activate
-                pytest tests -m parquet_data
-                '''
+                dir('PyTest DQ Framework') {
+                    sh '''
+                    . venv/bin/activate
+                    pytest tests -m parquet_data
+                    '''
+                }
             }
         }
     }
