@@ -101,3 +101,36 @@ def parquet_reader():
 def data_quality_library():
 
     return DataQualityLibrary()
+import pandas as pd
+
+
+@pytest.fixture
+def target_data():
+
+    return pd.DataFrame(
+        {
+            "facility_name": ["Test Facility"],
+            "visit_date": ["2025-01-01"],
+            "min_time_spent": [10],
+            "facility_type": ["Hospital"],
+            "avg_time_spent": [20],
+            "full_name": ["John Smith"],
+            "sum_treatment_cost": [100]
+        }
+    )
+
+
+@pytest.fixture
+def source_data():
+
+    return pd.DataFrame(
+        {
+            "facility_name": ["Test Facility"],
+            "visit_date": ["2025-01-01"],
+            "min_time_spent": [10],
+            "facility_type": ["Hospital"],
+            "avg_time_spent": [20],
+            "full_name": ["John Smith"],
+            "sum_treatment_cost": [100]
+        }
+    )
