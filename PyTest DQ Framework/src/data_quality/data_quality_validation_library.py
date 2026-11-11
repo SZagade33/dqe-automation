@@ -3,33 +3,56 @@ import pandas as pd
 
 class DataQualityLibrary:
     """
-    A library of static methods for performing data quality checks on pandas DataFrames.
-
-    This class is intended to be used in a PyTest-based testing framework to validate
-    the quality of data in DataFrames. Each method performs a specific data quality
-    check and uses assertions to ensure that the data meets the expected conditions.
+    Data Quality Validation Library
     """
 
     @staticmethod
     def check_duplicates(df, column_names=None):
+
         if column_names:
-            df.duplicates(column_names)
+            duplicates = df.duplicated(subset=column_names).sum()
         else:
-            df.duplicates(all_columns)
+            duplicates = df.duplicated().sum()
+
+        assert duplicates == 0, (
+            f"Found {duplicates} duplicate records"
+        )
 
     @staticmethod
     def check_count(df1, df2):
-        df1.count = df2.count
+
+        assert len(df1) == len(df2), (
+            f"Count mismatch. "
+            f"Source={len(df1)}, Target={len(df2)}"
+        )
 
     @staticmethod
     def check_data_full_data_set(df1, df2):
-        df1 = df2
+
+        pd.testing.assert_frame_equal(
+            df1.reset_index(drop=True),
+            df2.reset_index(drop=True),
+            check_dtype=False
+        )
 
     @staticmethod
     def check_dataset_is_not_empty(df):
-        df.is_not_empty
+
+        assert not df.empty, (
+            "Dataset is empty"
+        )
 
     @staticmethod
     def check_not_null_values(df, column_names=None):
-        col for df.column_names:
-            col.not_null
+
+        if column_names is None:
+            column_names = df.columns
+
+        for col in column_names:
+
+            null_count = df[col].isnull().sum()
+
+            assert null_count == 0, (
+                f"Column '{col}' contains "
+                f"{null_count} NULL values"
+            )
