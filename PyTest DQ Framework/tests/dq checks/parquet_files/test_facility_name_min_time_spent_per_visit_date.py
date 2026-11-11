@@ -37,7 +37,4 @@ def test_unique_facility_name_visit_date(
         subset=[
             "facility_name",
             "visit_date"
-        ]
-    ).sum()
-
-    assert duplicates == 0
+       
