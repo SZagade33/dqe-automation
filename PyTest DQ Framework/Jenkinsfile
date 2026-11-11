@@ -5,41 +5,21 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                sh 'pip install -r requirements.txt'
+                sh '''
+                python3 -m venv venv
+                . venv/bin/activate
+                pip install -r requirements.txt
+                '''
             }
         }
 
         stage('Run Data Quality Tests') {
             steps {
                 sh '''
-                pytest tests \
-                -m parquet_data \
-                --html=html_report/report.html \
-                --self-contained-html
+                . venv/bin/activate
+                pytest tests -m parquet_data
                 '''
             }
-        }
-
-        stage('Archive Report') {
-            steps {
-                archiveArtifacts(
-                    artifacts: 'html_report/report.html',
-                    fingerprint: true
-                )
-            }
-        }
-    }
-
-    post {
-        always {
-            publishHTML([
-                allowMissing: true,
-                alwaysLinkToLastBuild: true,
-                keepAll: true,
-                reportDir: 'html_report',
-                reportFiles: 'report.html',
-                reportName: 'DQ Test Report'
-            ])
         }
     }
 }
