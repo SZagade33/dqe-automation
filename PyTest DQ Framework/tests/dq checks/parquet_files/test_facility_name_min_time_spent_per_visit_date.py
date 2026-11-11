@@ -37,4 +37,35 @@ def test_unique_facility_name_visit_date(
         subset=[
             "facility_name",
             "visit_date"
-       
+        ]
+    ).sum()
+
+    assert duplicates == 0, (
+        f"Found {duplicates} duplicate records"
+    )
+
+
+@pytest.mark.parquet_data
+@pytest.mark.count
+def test_row_count(
+        source_data,
+        target_data,
+        data_quality_library):
+
+    data_quality_library.check_count(
+        source_data,
+        target_data
+    )
+
+
+@pytest.mark.parquet_data
+@pytest.mark.completeness
+def test_data_completeness(
+        source_data,
+        target_data,
+        data_quality_library):
+
+    data_quality_library.check_data_full_data_set(
+        source_data,
+        target_data
+    )
