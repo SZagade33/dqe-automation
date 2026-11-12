@@ -1,0 +1,7 @@
+robotframework
+robotframework-seleniumlibrary
+pandas
+pyarrow
+beautifulsoup4
+lxml
+selenium

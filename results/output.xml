@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot generator="Robot 7.5.1 (Python 3.12.10 on win32)" generated="2026-11-12T13:11:50.252468" rpa="false" schemaversion="5">
+<suite id="s1" name="Test" source="C:\Users\SachinRamchandraZaga\Downloads\dqe-automation-push\test.robot">
+<test id="s1-t1" name="Validate Report With Parquet" line="15">
+<kw name="Open Browser" owner="SeleniumLibrary">
+<msg time="2026-11-12T13:11:50.931766" level="INFO">Opening browser 'Edge' to base url 'file://C:\Users\SachinRamchandraZaga\Downloads\dqe-automation-push/generated_report/report.html'.</msg>
+<arg>file://C:\\Users\\SachinRamchandraZaga\\Downloads\\dqe-automation-push/${REPORT_FILE}</arg>
+<arg>Edge</arg>
+<doc>Opens a new browser instance to the optional ``url``.</doc>
+<status status="PASS" start="2026-11-12T13:11:50.930007" elapsed="1.999774"/>
+</kw>
+<kw name="Read Html Table" owner="helper">
+<msg time="2026-11-12T13:11:52.938000" level="INFO">HTML DATA
+
+      facility_type  visit_date  avg_time_spent
+0            Clinic  2026-10-10            21.0
+1          Hospital  2026-10-10            19.5
+2  Specialty Center  2026-10-10            41.5</msg>
+<msg time="2026-11-12T13:11:52.938000" level="INFO">${html_df} =       facility_type  visit_date  avg_time_spent
+0            Clinic  2026-10-10            21.0
+1          Hospital  2026-10-10            19.5
+2  Specialty Center  2026-10-10            41.5</msg>
+<var>${html_df}</var>
+<arg>${REPORT_FILE}</arg>
+<status status="PASS" start="2026-11-12T13:11:52.929781" elapsed="0.008219"/>
+</kw>
+<kw name="Read Parquet Data" owner="helper">
+<msg time="2026-11-12T13:11:53.088044" level="INFO">PARQUET DATA
+
+          facility_type visit_date  avg_time_spent
+25823          Hospital 2026-10-10            19.5
+25829  Specialty Center 2026-10-10            41.5
+25834            Clinic 2026-10-10            21.0</msg>
+<msg time="2026-11-12T13:11:53.091570" level="INFO">${parquet_df} =           facility_type visit_date  avg_time_spent
+25823          Hospital 2026-10-10            19.5
+25829  Specialty Center 2026-10-10            41.5
+25834            Clinic 2026-10-10            2...</msg>
+<var>${parquet_df}</var>
+<arg>${PARQUET_FOLDER}</arg>
+<arg>${FILTER_DATE}</arg>
+<status status="PASS" start="2026-11-12T13:11:52.938000" elapsed="0.153570"/>
+</kw>
+<kw name="Compare Dataframes" owner="helper">
+<msg time="2026-11-12T13:11:53.095191" level="INFO">${status} = True</msg>
+<msg time="2026-11-12T13:11:53.095191" level="INFO">${result} = MATCH</msg>
+<var>${status}</var>
+<var>${result}</var>
+<arg>${html_df}</arg>
+<arg>${parquet_df}</arg>
+<status status="PASS" start="2026-11-12T13:11:53.093306" elapsed="0.001885"/>
+</kw>
+<kw name="Log To Console" owner="BuiltIn">
+<arg>${result}</arg>
+<doc>Logs the given message to the console.</doc>
+<status status="PASS" start="2026-11-12T13:11:53.095191" elapsed="0.000000"/>
+</kw>
+<kw name="Should Be True" owner="BuiltIn">
+<arg>${status}</arg>
+<doc>Fails if the given condition is not true.</doc>
+<status status="PASS" start="2026-11-12T13:11:53.095191" elapsed="0.000000"/>
+</kw>
+<status status="PASS" start="2026-11-12T13:11:50.930007" elapsed="2.165184"/>
+</test>
+<kw name="Close Browser" owner="SeleniumLibrary" type="TEARDOWN">
+<doc>Closes the current browser.</doc>
+<status status="PASS" start="2026-11-12T13:11:53.095191" elapsed="2.141410"/>
+</kw>
+<status status="PASS" start="2026-11-12T13:11:50.262226" elapsed="4.974375"/>
+</suite>
+<statistics>
+<total>
+<stat pass="1" fail="0" skip="0">All Tests</stat>
+</total>
+<tag>
+</tag>
+<suite>
+<stat name="Test" id="s1" pass="1" fail="0" skip="0">Test</stat>
+</suite>
+</statistics>
+<errors>
+</errors>
+</robot>
