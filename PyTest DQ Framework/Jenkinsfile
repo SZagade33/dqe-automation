@@ -1,0 +1,29 @@
+pipeline {
+    agent any
+
+    stages {
+
+        stage('Install Dependencies') {
+            steps {
+                dir('PyTest DQ Framework') {
+                    sh '''
+                    python3 -m venv venv
+                    . venv/bin/activate
+                    pip install -r requirements.txt
+                    '''
+                }
+            }
+        }
+
+        stage('Run Data Quality Tests') {
+            steps {
+                dir('PyTest DQ Framework') {
+                    sh '''
+                    . venv/bin/activate
+                    pytest tests -m parquet_data
+                    '''
+                }
+            }
+        }
+    }
+}
